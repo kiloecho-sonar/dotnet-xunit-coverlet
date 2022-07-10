@@ -1,3 +1,11 @@
+.sonarqube
+TestResults
+coveragereport
+test_result.xml
+xunit_test_result.xml
+coverage.cobertura.xml
+
+
 *.swp
 *.*~
 project.lock.json
