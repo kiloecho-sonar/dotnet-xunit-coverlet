@@ -14,11 +14,16 @@ sonarqube-check:
       - "dotnet tool install -g dotnet-reportgenerator-globaltool"
       - "dotnet --list-sdks"
       - "export PATH=\"$PATH:$HOME/.dotnet/tools\""
-      - "dotnet sonarscanner begin /k:\"joe.tingsanchali_dotnet-xunit-coverlet_AYHfgbXPdII9JSl-sWpc\" /d:sonar.login=\"$SONAR_TOKEN\" /d:\"sonar.host.url=$SONAR_HOST_URL\" /d:\"sonar.coverageReportPaths=**/SonarQube.xml\" "
+      - "dotnet sonarscanner begin /k:\"joe.tingsanchali_dotnet-xunit-coverlet_AYHfgbXPdII9JSl-sWpc\"
+        /d:sonar.login=\"$SONAR_TOKEN\"
+        /d:\"sonar.host.url=$SONAR_HOST_URL\"
+        /d:\"sonar.cs.xunit.reportsPaths=**/xunit_test_result.xml\"
+        /d:\"sonar.coverageReportPaths=SonarQube.xml\" "
       - "dotnet build"
+      - "dotnet test --logger:\"xunit;LogFilePath=xunit_test_result.xml\" "
       # - "cd XUnit.Coverlet.Collector && dotnet test --collect:\"XPlat Code Coverage\" && cd .."
       - "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
-      - "reportgenerator -reports:\"*/coverage.cobertura.xml\" -targetdir:\"coveragereport\" -reporttypes:SonarQube"
+      - "reportgenerator -reports:\"*/coverage.cobertura.xml\" -targetdir:\".\" -reporttypes:SonarQube"
       - "dotnet sonarscanner end /d:sonar.login=\"$SONAR_TOKEN\""
   allow_failure: true
   only:
