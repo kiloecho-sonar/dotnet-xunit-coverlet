@@ -1,5 +1,5 @@
 sonarqube-check:
-  image: mcr.microsoft.com/dotnet/core/sdk:latest
+  image: mcr.microsoft.com/dotnet/sdk:6.0
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
     GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
@@ -11,9 +11,14 @@ sonarqube-check:
       - "apt-get update"
       - "apt-get install --yes openjdk-11-jre"
       - "dotnet tool install --global dotnet-sonarscanner"
+      - "dotnet tool install -g dotnet-reportgenerator-globaltool"
+      - "dotnet --list-sdks"
       - "export PATH=\"$PATH:$HOME/.dotnet/tools\""
-      - "dotnet sonarscanner begin /k:\"joe.tingsanchali_dotnet-xunit-coverlet_AYHfgbXPdII9JSl-sWpc\" /d:sonar.login=\"$SONAR_TOKEN\" /d:\"sonar.host.url=$SONAR_HOST_URL\" "
+      - "dotnet sonarscanner begin /k:\"joe.tingsanchali_dotnet-xunit-coverlet_AYHfgbXPdII9JSl-sWpc\" /d:sonar.login=\"$SONAR_TOKEN\" /d:\"sonar.host.url=$SONAR_HOST_URL\" /d:\"sonar.coverageReportPaths=**/SonarQube.xml\" "
       - "dotnet build"
+      # - "cd XUnit.Coverlet.Collector && dotnet test --collect:\"XPlat Code Coverage\" && cd .."
+      - "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
+      - "reportgenerator -reports:\"*/coverage.cobertura.xml\" -targetdir:\"coveragereport\" -reporttypes:SonarQube"
       - "dotnet sonarscanner end /d:sonar.login=\"$SONAR_TOKEN\""
   allow_failure: true
   only:
