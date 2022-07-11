@@ -8,22 +8,31 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script: 
+      # Update base packages 
       - "apt-get update"
       - "apt-get install --yes openjdk-11-jre"
+      # Install SonarQube's dotnet-sonarscanner and ReportGenerator
       - "dotnet tool install --global dotnet-sonarscanner"
       - "dotnet tool install -g dotnet-reportgenerator-globaltool"
-      - "dotnet --list-sdks"
       - "export PATH=\"$PATH:$HOME/.dotnet/tools\""
+      # Output installed dotnet SDKs based on Docker mcr.microsoft.com/dotnet/sdk image
+      - "dotnet --list-sdks"
+
+      # BEGIN phase of dotnet sonarscanner analysis
       - "dotnet sonarscanner begin /k:\"joe.tingsanchali_dotnet-xunit-coverlet_AYHfgbXPdII9JSl-sWpc\"
         /d:sonar.login=\"$SONAR_TOKEN\"
         /d:\"sonar.host.url=$SONAR_HOST_URL\"
         /d:\"sonar.cs.xunit.reportsPaths=**/xunit_test_result.xml\"
         /d:\"sonar.coverageReportPaths=SonarQube.xml\" "
+      # BUILD phase of dotnet sonarscanner analysis
       - "dotnet build"
+      # Output xUnit unit test XML report
       - "dotnet test --logger:\"xunit;LogFilePath=xunit_test_result.xml\" "
-      # - "cd XUnit.Coverlet.Collector && dotnet test --collect:\"XPlat Code Coverage\" && cd .."
+      # Output Cobertura coverage XML report, then use ReportGenerator to convert it to SonarQube format
+      # See https://github.com/danielpalme/ReportGenerator#supported-input-and-output-file-formats for valid output formats
       - "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
       - "reportgenerator -reports:\"*/coverage.cobertura.xml\" -targetdir:\".\" -reporttypes:SonarQube"
+      # END phase of dotnet sonarscanner analysis
       - "dotnet sonarscanner end /d:sonar.login=\"$SONAR_TOKEN\""
   allow_failure: true
   only:
