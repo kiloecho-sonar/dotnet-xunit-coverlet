@@ -7,6 +7,12 @@ sonarqube-check:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
+  artifacts:
+    paths:
+      - "*/xunit_test_result.xml"
+      - "*/SonarQube.xml"
+    untracked: false
+    expire_in: 7 days
   script: 
       # Update base packages 
       - "apt-get update"
@@ -28,7 +34,8 @@ sonarqube-check:
       - "dotnet build"
       # Output xUnit unit test XML report
       - "dotnet test --logger:\"xunit;LogFilePath=xunit_test_result.xml\" "
-      # Output Cobertura coverage XML report, then use ReportGenerator to convert it to SonarQube format
+      # Output Cobertura coverage XML report, then use ReportGenerator to convert it
+      # to SonarQube format, whose output is named "SonarQube.xml" by default.
       # See https://github.com/danielpalme/ReportGenerator#supported-input-and-output-file-formats for valid output formats
       - "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
       - "reportgenerator -reports:\"*/coverage.cobertura.xml\" -targetdir:\".\" -reporttypes:SonarQube"
