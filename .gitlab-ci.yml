@@ -29,7 +29,8 @@ sonarqube-check:
         /d:sonar.login=\"$SONAR_TOKEN\"
         /d:\"sonar.host.url=$SONAR_HOST_URL\"
         /d:\"sonar.cs.xunit.reportsPaths=**/xunit_test_result.xml\"
-        /d:\"sonar.coverageReportPaths=SonarQube.xml\" "
+        /d:\"sonar.coverageReportPaths=SonarQube.xml\"
+        /d:\"sonar.verbose=true\" "
       # BUILD phase of dotnet sonarscanner analysis
       - "dotnet build"
       # Output xUnit unit test XML report
